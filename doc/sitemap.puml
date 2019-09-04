@@ -1,0 +1,11 @@
+@startmindmap sitemap
+title サイトマップ(案)
+* root
+** pos
+***_ index.html(山車アクセス用)
+** api
+*** pos
+****_ [GET](一般利用者：位置情報配信API)
+****_ [POST] /山車No/緯度/経度(山車：位置情報収集)
+**_ index.html(一般利用者アクセス用)
+@endmindmap

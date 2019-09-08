@@ -1,0 +1,26 @@
+{
+  "name": "gae-sample",
+  "description": "Google App Engine Sample App",
+  "version": "0.0.1",
+  "private": true,
+  "author": "Technosite Corp.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shimada-shimasho/gae-sample"
+  },
+  "engines": {
+    "node": ">=10.0.0"
+  },
+  "scripts": {
+    "start": "node app.js",
+    "test": "mocha --exit test/*.test.js"
+  },
+  "dependencies": {
+    "@google-cloud/firestore": "^2.2.9",
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "mocha": "^6.1.4",
+    "supertest": "^4.0.2"
+  }
+}

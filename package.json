@@ -6,7 +6,7 @@
   "author": "Technosite Corp.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/???"
+    "url": "https://github.com/shimada-shimasho/gae-sample"
   },
   "engines": {
     "node": ">=10.0.0"

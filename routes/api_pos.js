@@ -8,56 +8,62 @@ const fs = require('fs');
 const firestore = new Firestore();
 const router = express.Router();
 
+const posFsColl = 'pos';        // 位置情報Firestoreコレクション
+const posDir = '/tmp/pos'       // 屋台位置情報キャッシュディレクトリ
+
+// [GET] /api/pos/
+// 屋台位置情報取得
 router.get('/', (req, res) => {
     console.log('[GET]');
+    console.log(`***GAE_VERSION: ${process.env.GAE_VERSION}`);
     const posMap = getPosMap();
     console.log('*** posMap');
     console.log(posMap);
-    res.redirect('/')
+    res.json(posMap);
 });
 
-router.post('/:no', (req, res) => {
+// [POST] /api/pos/
+// 屋台位置情報登録
+router.post('/', (req, res) => {
     console.log('[POST]');
-    console.log(`No:${req.params.no}, Latitude:${req.body.latitude}, Longtitude:${req.body.longitude}`)
-    putPos(req.params.no, req.body.latitude, req.body.longitude);
-    res.redirect('/')
+    // 現在のデプロイバージョンを屋台Noとする
+    const yataiNo = process.env.GAE_VERSION;
+    console.log(`***GAE_VERSION: ${yataiNo}`);
+    console.log(`No:${yataiNo}, Latitude:${req.body.latitude}, Longtitude:${req.body.longitude}`)
+    const pos = putPosToFirestore(yataiNo, req.body.latitude, req.body.longitude);
+    res.json(pos);
 });
 
-function putPos(no, latitude, longitude) {
-    const pos = {latitude: latitude, longitude: longitude};
-    const docRef = firestore.doc(`pos/${no}`);
-    docRef.set(pos).then(res => {
-        console.log('*** success: put firestore');
-        const tmpDirName = '/tmp/pos';
-        if (!fs.existsSync(tmpDirName)) {
-            fs.mkdirSync(tmpDirName);
-        }
-        fs.writeFileSync(`${tmpDirName}/${no}`, pos);
+// 屋台位置情報を取得する
+function getPosMap() {
+    const posMap = new Map();
+    if (!fs.existsSync(posDir)) {
+        // 位置情報キャッシュディレクトリが存在しなければそのままreturn
+        console.error(`!!! ${posDir} not found. !!!`);
+        return posMap;
+    }
+
+    // キャッシュディレクトリ内のファイル取得
+    const filenames = fs.readdirSync(posDir);
+    console.log(filenames);
+    filenames.forEach(f => {
+        // ファイルの内容を読み込み、posMapに格納する
+        console.log(`filename:${f}`);
+        const data = fs.readFileSync(`${posDir}/${f}`);
+        console.log(data.toString());
+        posMap.set(f, data.toString());
     });
+    return posMap;
 }
 
-async function getPosMap() {
-    const filenames = fs.readdirSync('/tmp');
-    console.log(filenames);
-
-    const posMap = new Map();
-    const collectionRef = firestore.collection('pos');
-    await collectionRef.listDocuments().then(docRefs => {
-        console.log(`docRefs.length:${docRefs.length}`);
-        docRefs.forEach((doc) => {
-            doc.get().then(pos => {
-                console.log('*** doc.path');
-                console.log(doc.path);
-                let geo = pos.get('geo');
-                console.log(`*** geo.latitude:${geo.latitude}`);
-                console.log(`*** geo.longitude:${geo.longitude}`);
-                posMap.set(doc.path, pos);
-            });
-        });
+// 屋台位置情報をFirestoreに保存する
+function putPosToFirestore(no, latitude, longitude) {
+    const pos = {latitude: parseFloat(latitude), longitude: parseFloat(longitude)};
+    const docRef = firestore.doc(`${posFsColl}/${no}`);
+    docRef.set(pos).then(res => {
+        console.log('*** success: put firestore');
     });
-    console.log('*** posMap(stringfy');
-    console.log(JSON.stringify(posMap));
-    return posMap;
+    return pos;
 }
 
 module.exports = router;

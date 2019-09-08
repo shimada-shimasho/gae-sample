@@ -26,6 +26,7 @@ router.get('/', (req, res) => {
 // 屋台位置情報登録
 router.post('/', (req, res) => {
     console.log('[POST]');
+    // 現在のデプロイバージョンを屋台Noとする
     const yataiNo = process.env.GAE_VERSION;
     console.log(`***GAE_VERSION: ${yataiNo}`);
     console.log(`No:${yataiNo}, Latitude:${req.body.latitude}, Longtitude:${req.body.longitude}`)
@@ -37,14 +38,16 @@ router.post('/', (req, res) => {
 function getPosMap() {
     const posMap = new Map();
     if (!fs.existsSync(posDir)) {
+        // 位置情報キャッシュディレクトリが存在しなければそのままreturn
         console.error(`!!! ${posDir} not found. !!!`);
         return posMap;
     }
 
+    // キャッシュディレクトリ内のファイル取得
     const filenames = fs.readdirSync(posDir);
     console.log(filenames);
-
     filenames.forEach(f => {
+        // ファイルの内容を読み込み、posMapに格納する
         console.log(`filename:${f}`);
         const data = fs.readFileSync(`${posDir}/${f}`);
         console.log(data.toString());

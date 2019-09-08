@@ -16,6 +16,7 @@ router.get('/', (req, res) => {
     console.log('*** pos_chache');
     const ver = process.env.GAE_VERSION;
     console.log(`***GAE_VERSION: ${ver}`);
+    // 位置情報キャッシュディレクトリが存在しなければ作成する
     if (!fs.existsSync(posDir)) {
         fs.mkdirSync(posDir);
     }
@@ -32,6 +33,7 @@ router.get('/', (req, res) => {
             doc.get().then(pos => {
                 console.log('*** doc.path');
                 console.log(doc.path);
+                // doc.pathから屋台Noを取り出す('pos/#'の#)
                 const yataiNoRegExp = /\d+/.exec(doc.path);
                 const yataiNo = yataiNoRegExp[0];
                 console.log('*** yataiNo');
@@ -39,7 +41,7 @@ router.get('/', (req, res) => {
                 console.log(JSON.stringify(pos.data()));
                 console.log(pos.data().latitude);
                 console.log(pos.data().longitude);
-                //*** write file
+                // キャッシュディレクトリに位置情報ファイルを保存する
                 console.log(`write pos data dir:${posDir}/${yataiNo}, data:${JSON.stringify(pos.data())}`);
                 fs.writeFileSync(`${posDir}/${yataiNo}`, JSON.stringify(pos.data()));
             });

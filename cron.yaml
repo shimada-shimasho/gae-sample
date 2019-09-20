@@ -1,5 +1,5 @@
 cron:
-- description: "位置情報定期キャッシュ: Firestore -> /tmp/pos/*"
-  url: /tasks/pos_cache
-  schedule: every 5 minutes from 15:00 to 16:00
-  timezone: Asia/Tokyo
+#- description: "位置情報定期キャッシュ: Firestore -> /tmp/pos/*"
+#  url: /tasks/pos_cache
+#  schedule: every 5 minutes from 15:00 to 16:00
+#  timezone: Asia/Tokyo

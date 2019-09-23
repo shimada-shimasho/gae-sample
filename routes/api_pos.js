@@ -14,7 +14,7 @@ const posDir = '/tmp/pos'       // 屋台位置情報キャッシュディレク
 // [GET] /api/pos/
 // 屋台位置情報取得
 router.get('/', async (req, res) => {
-    console.log('[GET]');
+    console.log('##### [GET] start');
     console.log(`***GAE_VERSION: ${process.env.GAE_VERSION}`);
     const posMap = await getPosMap();
     console.log('*** posMap');
@@ -24,20 +24,20 @@ router.get('/', async (req, res) => {
     console.log('*** posMap-stringfy');
     console.log(JSON.stringify(posMap));
     const strMap = JSON.stringify(posMap);
-    console.log('[GET] end');
+    console.log('##### [GET] end');
     res.send(strMap);
 });
 
 // [POST] /api/pos/
 // 屋台位置情報登録
 router.post('/', (req, res) => {
-    console.log('[POST]');
+    console.log('##### [POST] start');
     // 現在のデプロイバージョンを屋台Noとする
     const yataiNo = process.env.GAE_VERSION;
     console.log(`***GAE_VERSION: ${yataiNo}`);
     console.log(`No:${yataiNo}, Latitude:${req.body.latitude}, Longtitude:${req.body.longitude}`)
     const pos = putPosToFirestore(yataiNo, req.body.latitude, req.body.longitude);
-    console.log('[POST] end');
+    console.log('##### [POST] end');
     res.send(pos);
 });
 
@@ -62,62 +62,6 @@ async function getPosMap() {
         console.log(JSON.stringify(pos.data()));
         posMap[yataiNo] = pos.data();
     }
-    // snapshot.forEach(async doc => {
-    //     console.log('*** doc.path');
-    //     console.log(doc.path);
-    //     console.log(JSON.stringify(doc));
-    //     const pos = await doc.get();
-    //     // doc.pathから屋台Noを取り出す('pos/#'の#)
-    //     const yataiNoRegExp = /\d+/.exec(doc.path);
-    //     const yataiNo = Number(yataiNoRegExp[0]);
-    //     console.log('*** yataiNo');
-    //     console.log(yataiNo);
-    //     console.log(JSON.stringify(pos.data()));
-    //     posMap[yataiNo] = pos.data();
-    // });
-
-    // ### Promise版
-    // const collectionRef = firestore.collection(posFsColl);
-    // collectionRef.listDocuments().then(docRefs => {
-    //     console.log(`docRefs.length:${docRefs.length}`);
-    //     docRefs.forEach((doc) => {
-    //         doc.get().then(pos => {
-    //             console.log('*** doc.path');
-    //             console.log(doc.path);
-    //             // doc.pathから屋台Noを取り出す('pos/#'の#)
-    //             const yataiNoRegExp = /\d+/.exec(doc.path);
-    //             const yataiNo = yataiNoRegExp[0];
-    //             console.log('*** yataiNo');
-    //             console.log(yataiNo);
-    //             console.log(JSON.stringify(pos.data()));
-    //             console.log(pos.data().latitude);
-    //             console.log(pos.data().longitude);
-    //             posMap[yataiNo] = pos.data();
-    //             // // キャッシュディレクトリに位置情報ファイルを保存する
-    //             // console.log(`write pos data dir:${posDir}/${yataiNo}, data:${JSON.stringify(pos.data())}`);
-    //             // fs.writeFileSync(`${posDir}/${yataiNo}`, JSON.stringify(pos.data()));
-    //         });
-    //     });
-    // });
-
-    // // /tmp/posより取得
-    // const posMap = new Map();
-    // if (!fs.existsSync(posDir)) {
-    //     // 位置情報キャッシュディレクトリが存在しなければそのままreturn
-    //     console.error(`!!! ${posDir} not found. !!!`);
-    //     return posMap;
-    // }
-
-    // // キャッシュディレクトリ内のファイル取得
-    // const filenames = fs.readdirSync(posDir);
-    // console.log(filenames);
-    // filenames.forEach(f => {
-    //     // ファイルの内容を読み込み、posMapに格納する
-    //     console.log(`filename:${f}`);
-    //     const data = fs.readFileSync(`${posDir}/${f}`);
-    //     console.log(data.toString());
-    //     posMap.set(f, data.toString());
-    // });
     console.log('##### getPosMap(): end');
     return posMap;
 }

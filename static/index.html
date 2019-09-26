@@ -5,7 +5,28 @@
     <body>
         This page is Index Pages.
         <form method="get" action="/api/pos">
+        <!-- <form method="get" action="/tasks/pos_cache"> -->
             <input type="submit" value="位置情報取得">
         </form>
     </body>
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+<script src="https://www.gstatic.com/firebasejs/6.6.1/firebase-app.js"></script>
+
+<!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#config-web-app -->
+
+<script>
+  // Your web app's Firebase configuration
+  var firebaseConfig = {
+    apiKey: "AIzaSyBuyAY-i6RRuTVSAgjZx9mdDIZfmkMGh3A",
+    authDomain: "shimada-city-sample.firebaseapp.com",
+    databaseURL: "https://shimada-city-sample.firebaseio.com",
+    projectId: "shimada-city-sample",
+    storageBucket: "shimada-city-sample.appspot.com",
+    messagingSenderId: "676039101161",
+    appId: "1:676039101161:web:f6cadd3102bbb10d647e78"
+  };
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+</script>
 </html>

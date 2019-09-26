@@ -13,56 +13,68 @@ const posDir = '/tmp/pos'       // 屋台位置情報キャッシュディレク
 
 // [GET] /api/pos/
 // 屋台位置情報取得
-router.get('/', async (req, res) => {
-    console.log('##### [GET] start');
+router.get('/', (req, res) => {
+    console.log('[GET]');
     console.log(`***GAE_VERSION: ${process.env.GAE_VERSION}`);
-    const posMap = await getPosMap();
+    const posMap = getPosMap();
     console.log('*** posMap');
     console.log(posMap);
-    console.log('*** posMap[1]');
-    console.log(posMap[1]);
-    console.log('*** posMap-stringfy');
-    console.log(JSON.stringify(posMap));
-    const strMap = JSON.stringify(posMap);
-    console.log('##### [GET] end');
-    res.send(strMap);
+    res.json(posMap);
 });
 
 // [POST] /api/pos/
 // 屋台位置情報登録
 router.post('/', (req, res) => {
-    console.log('##### [POST] start');
+    console.log('[POST]');
     // 現在のデプロイバージョンを屋台Noとする
     const yataiNo = process.env.GAE_VERSION;
     console.log(`***GAE_VERSION: ${yataiNo}`);
     console.log(`No:${yataiNo}, Latitude:${req.body.latitude}, Longtitude:${req.body.longitude}`)
     const pos = putPosToFirestore(yataiNo, req.body.latitude, req.body.longitude);
-    console.log('##### [POST] end');
-    res.send(pos);
+    console.log(pos);
+    // res.json(pos);
+
+    console.log('[PAGE_BACK]');
+    res.writeHead(302, {
+        // 'Location': req.protocol + '://' + req.headers.host + req.url+'pos'
+        'Location': 'https://' + req.headers.host + req.url+'pos'
+    });
+    res.end();
 });
 
 // 屋台位置情報を取得する
-async function getPosMap() {
-    console.log('##### getPosMap(): start');
-    // Firestoreより取得
-    const posMap = new Array();
-    // async/await版
-    const collectionRef = firestore.collection(posFsColl);
-    const snapshot = await collectionRef.listDocuments();
-    for (const [ix, doc] of snapshot.entries()) {
-        console.log('*** doc.path');
-        console.log(doc.path);
-        console.log(JSON.stringify(doc));
-        const pos = await doc.get();
-        // doc.pathから屋台Noを取り出す('pos/#'の#)
-        const yataiNoRegExp = /\d+/.exec(doc.path);
-        const yataiNo = Number(yataiNoRegExp[0]);
-        console.log('*** yataiNo');
-        console.log(yataiNo);
-        console.log(JSON.stringify(pos.data()));
-        posMap[yataiNo] = pos.data();
-    }
-    console.log('##### getPosMap(): end');
+function getPosMap() {
+    const posMap = new Map();
+    // if (!fs.existsSync(posDir)) {
+    //     // 位置情報キャッシュディレクトリが存在しなければそのままreturn
+    //     console.error(`!!! ${posDir} not found. !!!`);
+    //     return posMap;
+    // }
+
+    // キャッシュディレクトリ内のファイル取得
+    // const filenames = fs.readdirSync(posDir);
+    // console.log(filenames);
+    // filenames.forEach(f => {
+    //     // ファイルの内容を読み込み、posMapに格納する
+    //     console.log(`filename:${f}`);
+    //     const data = fs.readFileSync(`${posDir}/${f}`);
+    //     console.log(data.toString());
+    //     posMap.set(f, data.toString());
+    // });
+//-----------------------------------------------------------
+//直接データを読みに行く
+    firestore.collection(posFsColl).get()
+        .then((snapshot) => {
+            snapshot.forEach(doc => {
+                console.log(doc.id, '=>', doc.data());
+                posMap.set([doc.id+'=>'+doc.data()])
+            });
+        })
+        .catch(err => {
+            console.log('Error getting documents', err);
+            posMap.set(['Error getting documents', err])
+        });
+//-----------------------------------------------------------
     return posMap;
 }
 

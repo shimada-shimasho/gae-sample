@@ -16,10 +16,14 @@ const posDir = '/tmp/pos'       // 屋台位置情報キャッシュディレク
 router.get('/', (req, res) => {
     console.log('[GET]');
     console.log(`***GAE_VERSION: ${process.env.GAE_VERSION}`);
-    const posMap = getPosMap();
-    console.log('*** posMap');
-    console.log(posMap);
-    res.json(posMap);
+    var posMap=getPosMap();
+    setTimeout(function(){
+      console.log('*** posMap');
+      console.log(posMap);
+      // res.json(posMap);
+      res.json(JSON.stringify([...posMap]));
+      console.log('posMap ***');
+    },5000);
 });
 
 // [POST] /api/pos/
@@ -63,17 +67,19 @@ function getPosMap() {
     // });
 //-----------------------------------------------------------
 //直接データを読みに行く
+    console.log('*** firebase');
     firestore.collection(posFsColl).get()
         .then((snapshot) => {
             snapshot.forEach(doc => {
                 console.log(doc.id, '=>', doc.data());
-                posMap.set([doc.id+'=>'+doc.data()])
+                posMap.set(doc.id,doc.data())
             });
         })
         .catch(err => {
             console.log('Error getting documents', err);
             posMap.set(['Error getting documents', err])
         });
+    console.log('firebase ***');
 //-----------------------------------------------------------
     return posMap;
 }

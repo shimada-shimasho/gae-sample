@@ -1,15 +1,17 @@
-function gps_get(){
-  // Geolocation APIに対応している
-  if (navigator.geolocation) {
-      console.log("この端末では位置情報が取得できます");
-      getPosition();
-      // Geolocation APIに対応していない
-  } else {
-      console.log("この端末では位置情報が取得できません");
-  }
+setTimeout(gps_post(),300000)
 
-  // 現在地取得処理
-  function getPosition() {
+function gps_post(){
+// Geolocation APIに対応している
+if (navigator.geolocation) {
+    console.log("この端末では位置情報が取得できます");
+    getPosition();
+    // Geolocation APIに対応していない
+} else {
+    console.log("この端末では位置情報が取得できません");
+}
+
+// 現在地取得処理
+function getPosition() {
     // 現在地を取得
     navigator.geolocation.getCurrentPosition(
         // 取得成功した場合
@@ -17,7 +19,7 @@ function gps_get(){
             var send_form = document.createElement('form');
             var latitude = document.createElement('input');
             var longitude = document.createElement('input');
-            send_form.method = 'GET';
+            send_form.method = 'POST';
             send_form.action = '/api/pos';
 
             latitude.type = 'hidden'; //入力フォームが表示されないように
@@ -57,5 +59,16 @@ function gps_get(){
           }
         }
     );
-  }
+}
+
+// // 屋台位置情報をFirestoreに保存する
+// function putPosToFirestore(no, latitude, longitude) {
+//     const pos = {latitude: parseFloat(latitude), longitude: parseFloat(longitude)};
+//     const docRef = firestore.doc(`${posFsColl}/${no}`);
+//     docRef.set(pos).then(res => {
+//         console.log('*** success: put firestore');
+//     });
+//     return pos;
+// }
+
 }

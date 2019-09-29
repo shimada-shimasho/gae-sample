@@ -7,9 +7,15 @@ const {Firestore} = require('@google-cloud/firestore');
 const fs = require('fs');
 const firestore = new Firestore();
 const router = express.Router();
+require('date-utils');
 
 const posFsColl = 'pos';        // 位置情報Firestoreコレクション
 const posDir = '/tmp/pos'       // 屋台位置情報キャッシュディレクトリ
+
+//現在時刻の取得
+var dt=new Date();
+// var date = dt.getTime();
+var date=dt.toLocaleString();
 
 // [GET] /api/pos/
 // 屋台位置情報取得
@@ -34,14 +40,14 @@ router.post('/', (req, res) => {
     const yataiNo = process.env.GAE_VERSION;
     console.log(`***GAE_VERSION: ${yataiNo}`);
     console.log(`No:${yataiNo}, Latitude:${req.body.latitude}, Longtitude:${req.body.longitude}`)
-    const pos = putPosToFirestore(yataiNo, req.body.latitude, req.body.longitude);
+    const pos = putPosToFirestore(yataiNo, req.body.latitude, req.body.longitude,date);
     console.log(pos);
     // res.json(pos);
 
     console.log('[PAGE_BACK]');
     res.writeHead(302, {
         // 'Location': req.protocol + '://' + req.headers.host + req.url+'pos'
-        'Location': 'https://' + req.headers.host + req.url+'pos'
+        'Location': 'https://' + req.headers.host + req.url+'pos?'+date
     });
     res.end();
 });
@@ -85,8 +91,8 @@ function getPosMap() {
 }
 
 // 屋台位置情報をFirestoreに保存する
-function putPosToFirestore(no, latitude, longitude) {
-    const pos = {latitude: parseFloat(latitude), longitude: parseFloat(longitude)};
+function putPosToFirestore(no, latitude, longitude,date) {
+    const pos = {latitude: parseFloat(latitude), longitude: parseFloat(longitude) , time:date};
     const docRef = firestore.doc(`${posFsColl}/${no}`);
     docRef.set(pos).then(res => {
         console.log('*** success: put firestore');
